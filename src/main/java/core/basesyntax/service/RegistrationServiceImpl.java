@@ -14,16 +14,25 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (user == null) {
             throw new RegistrationException("user is not found");
         }
-        if (user.getLogin() == null || user.getLogin().length() < MAX_LENGTH) {
+        if (user.getLogin() == null) {
+            throw new RegistrationException("Login can't be null");
+        }
+        if (user.getLogin().length() < MAX_LENGTH) {
             throw new RegistrationException("Login too short");
         }
         if (storageDao.get(user.getLogin()) != null) {
             throw new RegistrationException("User is already exists");
         }
-        if (user.getPassword() == null || user.getPassword().length() < MAX_LENGTH) {
+        if (user.getPassword() == null) {
+            throw new RegistrationException("Password can`t be null");
+        }
+        if (user.getPassword().length() < MAX_LENGTH) {
             throw new RegistrationException("Password too short");
         }
-        if (user.getAge() == null || user.getAge() < MIN_AGE) {
+        if (user.getAge() == null) {
+            throw new RegistrationException("Age can`t be null");
+        }
+        if (user.getAge() < MIN_AGE) {
             throw new RegistrationException("Not valid age: " + user.getAge()
                     + ". Min allowed age is " + MIN_AGE);
         }
