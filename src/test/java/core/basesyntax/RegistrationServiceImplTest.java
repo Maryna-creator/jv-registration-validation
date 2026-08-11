@@ -1,5 +1,7 @@
 package core.basesyntax;
 
+import core.basesyntax.dao.StorageDao;
+import core.basesyntax.dao.StorageDaoImpl;
 import core.basesyntax.db.Storage;
 import core.basesyntax.model.User;
 import core.basesyntax.service.RegistrationException;
@@ -11,11 +13,11 @@ import org.junit.jupiter.api.Test;
 
 public class RegistrationServiceImplTest {
     private RegistrationService registrationService = new RegistrationServiceImpl();
+    private StorageDao storageDao = new StorageDaoImpl();
 
     @BeforeEach
     void setUp() {
         Storage.people.clear();
-        registrationService = new RegistrationServiceImpl();
     }
 
     private User createUser(String login, String password, Integer age) {
@@ -27,22 +29,22 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void validUser_Ok() {
+    void register_validUser_Ok() {
         setUp();
         User user = createUser("validLogin", "validPassword", 20);
-        Assertions.assertEquals(user,registrationService.register(user));
-        Assertions.assertNotNull(Storage.people.get(0));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void userNull_NotOk() {
+    void register_userNull_NotOk() {
         setUp();
         Assertions.assertThrows(RegistrationException.class,
                 () -> registrationService.register(null));
     }
 
     @Test
-    void loginNull_NotOk() {
+    void register_loginNull_NotOk() {
         setUp();
         User user = createUser(null, "validPassword", 22);
         Assertions.assertThrows(RegistrationException.class,
@@ -50,7 +52,7 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void passwordNull_NotOk() {
+    void register_passwordNull_NotOk() {
         setUp();
         User user = createUser("validLogin", null, 20);
         Assertions.assertThrows(RegistrationException.class,
@@ -58,7 +60,7 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void ageNull_NotOk() {
+    void register_ageNull_NotOk() {
         setUp();
         User user = createUser("validLogin", "validPassword", null);
         Assertions.assertThrows(RegistrationException.class,
@@ -66,7 +68,23 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void loginShort5_NotOk() {
+    void register_loginLength0_NotOk() {
+        setUp();
+        User user = createUser("", "validPassword", 22);
+        Assertions.assertThrows(RegistrationException.class,
+                () -> registrationService.register(user));
+    }
+
+    @Test
+    void register_loginLength3_NotOk() {
+        setUp();
+        User user = createUser("log", "validPassword", 22);
+        Assertions.assertThrows(RegistrationException.class,
+                () -> registrationService.register(user));
+    }
+
+    @Test
+    void register_loginShort5_NotOk() {
         setUp();
         User user = createUser("login", "validPassword", 22);
         Assertions.assertThrows(RegistrationException.class,
@@ -74,21 +92,39 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void loginLength6_Ok() {
+    void register_loginLength6_Ok() {
         setUp();
         User user = createUser("validL", "validPassword", 22);
-        Assertions.assertNotNull(registrationService.register(user));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void loginLength8_Ok() {
+    void register_loginLength8_Ok() {
         setUp();
         User user = createUser("validLog", "validPassword", 22);
-        Assertions.assertNotNull(registrationService.register(user));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void passwordShort5_NotOk() {
+    void register_passwordLength0_NotOk() {
+        setUp();
+        User user = createUser("validLogin", "", 22);
+        Assertions.assertThrows(RegistrationException.class,
+                () -> registrationService.register(user));
+    }
+
+    @Test
+    void register_passwordLength3_NotOk() {
+        setUp();
+        User user = createUser("validLogin", "pas", 22);
+        Assertions.assertThrows(RegistrationException.class,
+                () -> registrationService.register(user));
+    }
+
+    @Test
+    void register_passwordShort5_NotOk() {
         setUp();
         User user = createUser("validLogin", "passW", 23);
         Assertions.assertThrows(RegistrationException.class,
@@ -96,21 +132,23 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void passwordLength6_Ok() {
+    void register_passwordLength6_Ok() {
         setUp();
         User user = createUser("validLogin", "passWo", 23);
-        Assertions.assertNotNull(registrationService.register(user));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void passwordLength8_Ok() {
+    void register_passwordLength8_Ok() {
         setUp();
         User user = createUser("validLogin", "passWord", 23);
-        Assertions.assertNotNull(registrationService.register(user));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void notValidAgeIs17_NotOk() {
+    void register_notValidAgeIs17_NotOk() {
         setUp();
         User user = createUser("validLogin", "validPassword", 17);
         Assertions.assertThrows(RegistrationException.class,
@@ -118,14 +156,15 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void ageIs18_Ok() {
+    void register_ageIs18_Ok() {
         setUp();
         User user = createUser("validLogin", "validPassword", 18);
-        Assertions.assertNotNull(registrationService.register(user));
+        registrationService.register(user);
+        Assertions.assertEquals(user, storageDao.get(user.getLogin()));
     }
 
     @Test
-    void negativeAge() {
+    void register_negativeAge_NotOk() {
         setUp();
         User user = createUser("validLogin", "validPassword", -1);
         Assertions.assertThrows(RegistrationException.class,
@@ -133,10 +172,10 @@ public class RegistrationServiceImplTest {
     }
 
     @Test
-    void userLoginExist_NotOk() {
+    void register_userLoginExist_NotOk() {
         setUp();
         User user1 = createUser("sameLogin", "password1", 20);
-        registrationService.register(user1);
+        Storage.people.add(user1);
 
         User user2 = createUser("sameLogin", "password2", 25);
         Assertions.assertThrows(RegistrationException.class,
