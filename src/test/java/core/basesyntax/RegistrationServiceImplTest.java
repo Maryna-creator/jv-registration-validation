@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 public class RegistrationServiceImplTest {
     private RegistrationService registrationService = new RegistrationServiceImpl();
-    private StorageDao storageDao = new StorageDaoImpl();
 
     @AfterEach
     void setUp() {
@@ -25,8 +24,8 @@ public class RegistrationServiceImplTest {
     @Test
     void register_validUser_Ok() {
         User user = createUser("validLogin", "validPassword", 20);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
@@ -80,15 +79,15 @@ public class RegistrationServiceImplTest {
     @Test
     void register_loginLength6_Ok() {
         User user = createUser("validL", "validPassword", 22);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
     void register_loginLength8_Ok() {
         User user = createUser("validLog", "validPassword", 22);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
@@ -115,15 +114,15 @@ public class RegistrationServiceImplTest {
     @Test
     void register_passwordLength6_Ok() {
         User user = createUser("validLogin", "passWo", 23);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
     void register_passwordLength8_Ok() {
         User user = createUser("validLogin", "passWord", 23);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
@@ -136,8 +135,8 @@ public class RegistrationServiceImplTest {
     @Test
     void register_ageIs18_Ok() {
         User user = createUser("validLogin", "validPassword", 18);
-        registrationService.register(user);
-        assertEquals(user, storageDao.get(user.getLogin()));
+        User actual = registrationService.register(user);
+        assertEquals(user, actual);
     }
 
     @Test
